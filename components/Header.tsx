@@ -1,10 +1,23 @@
+
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { authService, User } from '@/lib/auth';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setUser(authService.getCurrentUser());
+  }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    window.location.href = '/';
+  };
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -29,6 +42,35 @@ export default function Header() {
             <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
               소개
             </Link>
+            
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+                  대시보드
+                </Link>
+                <div className="flex items-center space-x-2">
+                  {user.avatar && (
+                    <img src={user.avatar} alt={user.name} className="w-6 h-6 rounded-full object-cover" />
+                  )}
+                  <span className="text-sm text-gray-600">{user.name}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-gray-500 hover:text-gray-700 cursor-pointer ml-2"
+                  >
+                    <i className="ri-logout-box-line w-4 h-4 flex items-center justify-center"></i>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link href="/login" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+                  로그인
+                </Link>
+                <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap">
+                  회원가입
+                </Link>
+              </div>
+            )}
           </div>
 
           <button
@@ -54,6 +96,29 @@ export default function Header() {
               <Link href="/about" className="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">
                 소개
               </Link>
+              
+              {user ? (
+                <>
+                  <Link href="/dashboard" className="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                    대시보드
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer"
+                  >
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                    로그인
+                  </Link>
+                  <Link href="/register" className="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                    회원가입
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
